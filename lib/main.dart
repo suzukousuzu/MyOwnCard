@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
 import 'screens/home_screen.dart';
+import 'package:my_own_cards/db/database.dart';
 
-void main() => runApp(MyApp());
+late Mydatabase mydatabase;
+
+void main() {
+  mydatabase = Mydatabase();
+  runApp(MyApp());
+}
+
 
 class MyApp extends StatelessWidget {
   @override
