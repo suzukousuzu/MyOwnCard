@@ -12,6 +12,8 @@ class Words extends Table {
 
   TextColumn get strAnswer => text()();
 
+  BoolColumn get isMemorized => boolean().withDefault(Constant(false))();
+
   @override
   Set<Column> get primaryKey => {strQuestion};
 }
@@ -22,7 +24,17 @@ class Mydatabase extends _$Mydatabase {
 
   @override
   // TODO: implement schemaVersion
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
+
+  //統合処理
+  MigrationStrategy get migration =>
+      MigrationStrategy(onCreate: (Migrator m) {
+        return m.createAll();
+      }, onUpgrade: (Migrator m, int from, int to) async {
+        if (from == 2) {
+          await m.addColumn(words, words.isMemorized);
+        }
+      });
 
   //create
   Future addWord(Word word) => into(words).insert(word);
@@ -30,12 +42,23 @@ class Mydatabase extends _$Mydatabase {
   //read
   Future<List<Word>> get allWords => select(words).get();
 
+  //Read　暗記済みの単語除外
+  Future<List<Word>> get getMemorizedWords =>
+      (select(words)
+        ..where((tbl) => tbl.isMemorized.equals(false))).get();
+
+  //read ソート
+  Future<List<Word>> get getWordsSorted =>
+      (select(words)
+        ..orderBy([(tbl) => OrderingTerm(expression:tbl.isMemorized )])).get();
+
   //update
   Future updateWord(Word word) => update(words).replace(word);
 
   //delete
   Future deleteWord(Word word) =>
-      (delete(words)..where((t) => t.strQuestion.equals(word.strQuestion)))
+      (delete(words)
+        ..where((t) => t.strQuestion.equals(word.strQuestion)))
           .go();
 }
 

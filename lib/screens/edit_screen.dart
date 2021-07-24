@@ -148,29 +148,87 @@ class _EditScreenState extends State<EditScreen> {
           gravity: ToastGravity.TOP);
       return;
     } else {
-      var word = Word(
-          strQuestion: questionController.text,
-          strAnswer: answerController.text);
+      if (widget.state == EditStatus.ADD) {
+        showDialog(
+            context: context,
+            builder: (_) => AlertDialog(
+                  title: Text('登録'),
+                  content: Text('登録してもいいですか'),
+                  actions: [
+                    TextButton(
+                      child: Text("はい"),
+                      onPressed: () async {
+                        var word = Word(
+                            strQuestion: questionController.text,
+                            strAnswer: answerController.text,
+                            isMemorized: false);
+                        try {
+                          await mydatabase.addWord(word);
+                          questionController.clear();
+                          answerController.clear();
 
-      try {
-        if (widget.state == EditStatus.EDIT) {
-          await mydatabase.updateWord(word);
-        } else {
-          await mydatabase.addWord(word);
-        }
-        questionController.clear();
-        answerController.clear();
+                          //登録完了メッセージ
+                          Fluttertoast.showToast(
+                              msg: '登録が完了しました',
+                              toastLength: Toast.LENGTH_LONG,
+                              gravity: ToastGravity.BOTTOM);
+                        } on SqliteException catch (e) {
+                          Fluttertoast.showToast(
+                              msg: 'この問題はすでに登録されています',
+                              toastLength: Toast.LENGTH_LONG,
+                              gravity: ToastGravity.BOTTOM);
+                        }
+                        Navigator.pop(context);
+                      },
+                    ),
+                    TextButton(
+                      child: Text("いいえ"),
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                    )
+                  ],
+                ));
+      } else {
+        showDialog(
+            context: context,
+            builder: (_) => AlertDialog(
+                  title: Text("更新"),
+                  content: Text("更新してもいいですか"),
+                  actions: [
+                    TextButton(
+                      child: Text("はい"),
+                      onPressed: () async {
+                        var word = Word(
+                            strQuestion: questionController.text,
+                            strAnswer: answerController.text,
+                            isMemorized: false);
+                        try {
+                          await mydatabase.updateWord(word);
+                          _backToWordScreen();
 
-        //登録完了メッセージ
-        Fluttertoast.showToast(
-            msg: '登録が完了しました',
-            toastLength: Toast.LENGTH_LONG,
-            gravity: ToastGravity.BOTTOM);
-      } on SqliteException catch (e) {
-        Fluttertoast.showToast(
-            msg: 'この問題はすでに登録されています',
-            toastLength: Toast.LENGTH_LONG,
-            gravity: ToastGravity.BOTTOM);
+                          //更新完了メッセージ
+                          Fluttertoast.showToast(
+                              msg: '更新が完了しました',
+                              toastLength: Toast.LENGTH_LONG,
+                              gravity: ToastGravity.BOTTOM);
+                        } on SqliteException catch (e) {
+                          Fluttertoast.showToast(
+                              msg: '何らかの問題で更新できませんでした。',
+                              toastLength: Toast.LENGTH_LONG,
+                              gravity: ToastGravity.BOTTOM);
+                        }
+                        Navigator.pop(context);
+                      },
+                    ),
+                    TextButton(
+                      child: Text("いいえ"),
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                    )
+                  ],
+                ));
       }
     }
   }

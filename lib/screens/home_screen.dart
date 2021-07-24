@@ -9,7 +9,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  bool isMemorizedWords = false;
+  bool isMemorized = false;
 
   @override
   Widget build(BuildContext context) {
@@ -34,8 +34,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     color: Colors.cyan,
                     onPressed: () {
                       //押した時の処理
-                      Navigator.push(context, MaterialPageRoute(builder: (context) {
-                        return TestScreen(isMemorizedWords: isMemorizedWords,);
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) {
+                        return TestScreen(
+                          isMemorized: isMemorized,
+                        );
                       }));
                     },
                     icon: Icon(Icons.play_arrow),
@@ -46,7 +49,9 @@ class _HomeScreenState extends State<HomeScreen> {
               height: 30.0,
             ),
             // ラジオぼたん
-            _radioButtons(),
+            //_radioButtons(),
+            //スイッチとぐる
+            _switch(),
             SizedBox(
               height: 30.0,
             ),
@@ -82,6 +87,21 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Widget _switch() {
+    return Padding(
+      padding: const EdgeInsets.only(left:50.0),
+      child: SwitchListTile(
+          title: Text("暗記済みの単語を含む"),
+          secondary: Icon(Icons.sort),
+          value: isMemorized,
+          onChanged: (value) {
+            setState(() {
+              isMemorized = value;
+            });
+          }),
+    );
+  }
+
   Widget _titleText() {
     return Column(
       children: [
@@ -108,25 +128,23 @@ class _HomeScreenState extends State<HomeScreen> {
                 style: TextStyle(fontSize: 16.0),
               ),
               value: false,
-              groupValue: isMemorizedWords,
+              groupValue: isMemorized,
               onChanged: (value) {
                 setState(() {
-                  isMemorizedWords = false;
+                  isMemorized = false;
                 });
               }),
           RadioListTile(
               title: Text('暗記済みの単語を含む', style: TextStyle(fontSize: 16.0)),
               value: true,
-              groupValue: isMemorizedWords,
+              groupValue: isMemorized,
               onChanged: (value) {
                 setState(() {
-                  isMemorizedWords = true;
+                  isMemorized = true;
                 });
               })
         ],
       ),
     );
   }
-
-
 }

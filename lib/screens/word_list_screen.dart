@@ -26,6 +26,13 @@ class _WordListScreenState extends State<WordListScreen> {
           style: TextStyle(fontSize: 20.0),
         ),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.sort),
+            tooltip: "新しい単語の登録",
+            onPressed: () => _sortWord(),
+          )
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => Navigator.pushReplacement(context,
@@ -58,34 +65,56 @@ class _WordListScreenState extends State<WordListScreen> {
   Widget _wordItem(int position) {
     return Card(
       elevation: 5.0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8.0)
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.0)),
       child: ListTile(
         title: Text("${_wordList[position].strQuestion}"),
         subtitle: Text(
           "${_wordList[position].strAnswer}",
           style: TextStyle(fontFamily: 'Montserrat'),
         ),
+        trailing: _wordList[position].isMemorized ? Icon(Icons.check) : null,
         onTap: () => Navigator.pushReplacement(context,
             MaterialPageRoute(builder: (context) {
-              return EditScreen(
-                state: EditStatus.EDIT,
-                word: _wordList[position],
-              );
-            })),
+          return EditScreen(
+            state: EditStatus.EDIT,
+            word: _wordList[position],
+          );
+        })),
         onLongPress: () => _deleteWord(_wordList[position]),
       ),
     );
   }
 
-  _deleteWord(Word selectedWord) async{
-    await mydatabase.deleteWord(selectedWord);
-    Fluttertoast.showToast(
-        msg: '削除しました',
-        toastLength: Toast.LENGTH_LONG,
-        gravity: ToastGravity.BOTTOM);
-    getAllWords();
+  _deleteWord(Word selectedWord) async {
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => AlertDialog(
+              title: Text(selectedWord.strQuestion),
+              content: Text('削除してもいいですか'),
+              actions: [
+                TextButton(
+                    onPressed: () async {
+                      await mydatabase.deleteWord(selectedWord);
+                      Fluttertoast.showToast(
+                          msg: '削除しました',
+                          toastLength: Toast.LENGTH_LONG,
+                          gravity: ToastGravity.BOTTOM);
+                      getAllWords();
+                      Navigator.pop(context);
+                    },
+                    child: Text('はい')),
+                TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: Text('いいえ'))
+              ],
+            ));
+  }
 
- }
+  void _sortWord() async {
+    _wordList = await mydatabase.getWordsSorted;
+    setState(() {});
+  }
 }
